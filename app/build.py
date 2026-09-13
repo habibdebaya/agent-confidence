@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+from hashlib import sha256
 from pathlib import Path
 
 
@@ -28,10 +29,15 @@ def build(destination: Path, repo_url: str = '') -> Path:
                       if path.is_file() and str(path.relative_to(destination)) not in permitted]
         if unexpected:
             raise ValueError('export directory contains unexpected files; choose an empty directory')
+    asset_versions = {name: sha256((source / name).read_bytes()).hexdigest()[:12]
+                      for name in FILES if name.endswith(('.css', '.js'))}
     for name, target in FILES.items():
         content = (source / name).read_bytes()
-        if name.endswith('.html') and repo_url:
-            content = content.replace(b'data-repo-link hidden', f'data-repo-link href="{repo_url.rstrip("/")}"'.encode())
+        if name.endswith('.html'):
+            for asset, version in asset_versions.items():
+                content = content.replace(f'static/{asset}"'.encode(), f'static/{asset}?v={version}"'.encode())
+            if repo_url:
+                content = content.replace(b'data-repo-link hidden', f'data-repo-link href="{repo_url.rstrip("/")}"'.encode())
         output = destination / target
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_bytes(content)

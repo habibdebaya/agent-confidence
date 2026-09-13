@@ -59,6 +59,8 @@ python3 -m http.server 8000 --directory dist
 
 The application is available at `http://localhost:8000/`, with the web report at `/technical-report/`. It supports search by agent name, registry ID, or a recorded owner or active declared-wallet address.
 
+Pushes to `main` publish the static site to GitHub Pages through the `Publish static demo` workflow. The build versions CSS and JavaScript URLs by file content so browsers retrieve updated assets after deployment.
+
 ## Reproduction
 
 Python 3.11 or later is required for the scoring and data-processing implementation:
