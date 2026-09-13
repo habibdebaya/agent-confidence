@@ -8,7 +8,7 @@ This repository studies the aggregation of agent quality ratings when observatio
 
 The evaluation uses a Base registry snapshot from **3 September 2026**, containing 84,376 registered agents and 461,035 active feedback records. The method admits 11,113 quality ratings after excluding owner-linked groups. It assigns a nonzero score to **226 agents**, with **five scores at or above 50**. These values describe support from recorded ratings; they are not calibrated probabilities of successful service delivery.
 
-![Agent-level confidence assessment and supporting evidence](docs/preview.png)
+![Agent-level confidence assessment and supporting evidence](docs/preview.png?v=48ae4526a3b0)
 
 ## Method
 
