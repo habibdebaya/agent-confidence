@@ -124,7 +124,7 @@ async function start() {
     snapshot = await readJSON('./static/data/snapshot.json');
     const date = new Date(snapshot.timestamp).toISOString().slice(0, 10);
     $('#snapshotLine').textContent = `${number(snapshot.summary.agents)} registered agents · ${date} UTC · Block ${number(snapshot.block)}`;
-    $('#methodVersion').textContent = `${snapshot.version} · ${number(snapshot.summary.scored_agents)} nonzero scores`;
+    $('#methodVersion').textContent = snapshot.version;
     $('#examples').innerHTML = snapshot.examples.map(agent => `<button type="button" class="example" data-agent="${agent[0]}" aria-pressed="false"><span><strong>${esc(nameOf(agent))}</strong><small>${exampleNotes[agent[0]] || `Agent #${agent[0]}`}</small></span><span>${number(resultFor(agent[0]).score)}</span></button>`).join('');
     $('#examples').querySelectorAll('button').forEach(button => button.addEventListener('click', () => selectAgent(snapshot.examples.find(agent => agent[0] === Number(button.dataset.agent)))));
     $('#searchForm').addEventListener('submit', event => { event.preventDefault(); search($('#query').value); });
