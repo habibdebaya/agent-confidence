@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A reproducible study of confidence scoring for ERC-8004 agents using quality ratings, observed reviewer relationships, and an explicit uncertainty reserve.">
+  <title>ERC-8004 Agent Confidence | Research demonstration</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2336495a'/%3E%3Cpath d='M10 12h20L20 30z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./static/site.css">
+  <script src="./static/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#lookup">Skip to agent lookup</a>
+<div class="page">
+  <header class="header">
+    <a class="brand" href="./"><span>Agent Confidence<small>ERC-8004 RESEARCH</small></span></a>
+    <nav aria-label="Main navigation"><a href="./technical-report/" target="_blank" rel="noopener">Technical report <span aria-hidden="true">↗</span></a><a data-repo-link hidden target="_blank" rel="noopener">GitHub ↗</a></nav>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Research demonstration · Base registry snapshot</p>
+      <h1>Confidence scoring for ERC-8004 agents</h1>
+      <p class="intro">This study examines how recorded reviewer relationships and limited evidence affect the aggregation of agent quality ratings. The demonstration presents each score with its supporting records and mathematical interpretation.</p>
+      <p class="author-line"><a href="https://habibdebaya.github.io/" target="_blank" rel="noopener">Habib Debaya</a></p>
+      <div class="snapshot-line" id="snapshotLine">Loading the saved snapshot…</div>
+    </section>
+    <section class="workspace" id="lookup" aria-label="Agent confidence lookup">
+      <aside class="selection">
+        <div class="section-label">Agent selection</div>
+        <form id="searchForm">
+          <label for="query">Name, agent ID, or Base address</label>
+          <div class="search-field"><input id="query" type="search" autocomplete="off" spellcheck="false" placeholder="Search the snapshot" required><button type="submit" aria-label="Search agents">→</button></div>
+        </form>
+        <div id="searchStatus" class="search-status" role="status"></div>
+        <div id="searchResults" class="search-results" aria-label="Search results" hidden></div>
+        <p class="small-label">Selected case studies</p>
+        <div id="examples" class="examples"></div>
+        <p class="selection-note">Names are declared by registrants. Address search matches recorded agent owners and active declared wallets.</p>
+        <a class="text-link" href="./technical-report/#coverage" target="_blank" rel="noopener">Dataset and coverage</a>
+      </aside>
+      <div class="assessment" id="assessment" aria-live="polite" aria-busy="true">
+        <p class="loading">Loading the selected case study…</p>
+      </div>
+    </section>
+    <section class="method-preview" aria-labelledby="methodTitle">
+      <div><p class="eyebrow">Method</p><h2 id="methodTitle">Reviewer groups and an uncertainty reserve</h2><p>Repeated submissions and relationships between reviewer addresses can create dependence among ratings. The method assigns one contribution to each observed group and adjusts the aggregate for an explicit reserve of hypothetical adverse sources.</p><a class="text-link" href="./technical-report/#derivation" target="_blank" rel="noopener">Mathematical derivation</a></div>
+      <div class="method-steps"><div><span>01</span><p><strong>Rating eligibility</strong>The calculation uses active <code>starred</code> ratings with values in [0, 100]. Other feedback types are excluded.</p></div><div><span>02</span><p><strong>Group contributions</strong>Each group contributes its minimum admitted rating. Groups linked to the agent's current owner are excluded.</p></div><div><span>03</span><p><strong>Regularization for limited evidence</strong>Total support is divided by the number of groups plus four. The report derives this reserve construction and examines its sensitivity.</p></div></div>
+    </section>
+    <section class="scope-banner"><strong>Interpretation and limitations</strong><p>The score is an uncalibrated index of support from recorded quality ratings. Prior payment matches are reported as contextual evidence and have no numerical weight. The guarantees are conditional on observed group assignments; coordinated reviewers with undetected relationships can inflate the score.</p></section>
+  </main>
+  <footer class="footer"><span><a href="https://habibdebaya.github.io/" target="_blank" rel="noopener">Habib Debaya ↗</a></span><span id="methodVersion">Source reserve · v0.1</span></footer>
+</div>
+<noscript><p class="noscript">JavaScript is required for agent lookup. The <a href="./technical-report/">technical report</a> can be read without it.</p></noscript>
+</body>
+</html>

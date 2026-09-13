@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "erc8004-agent-confidence"
+version = "0.1.0"
+description = "Inspectable confidence scores and reputation experiments for ERC-8004 agents"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<0.116",
+  "httpx>=0.27",
+  "networkx>=3.2",
+  "numpy>=1.26",
+  "polars>=1.8",
+  "pyarrow>=17",
+  "pyyaml>=6",
+  "tenacity>=9",
+  "uvicorn>=0.30",
+  "web3>=7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "pytest-cov>=5", "hypothesis>=6.100"]
+
+[project.scripts]
+erc8004 = "crawl.cli:main"
+erc8004-grounding = "eval.grounding:main"
+erc8004-confidence = "eval.confidence:main"
+erc8004-serve = "app.main:run"
+
+[tool.setuptools.packages.find]
+include = ["app*", "crawl*", "trustlayer*", "sim*", "eval*"]
+
+[tool.setuptools.package-data]
+app = ["static/*.html", "static/*.css", "static/*.js", "static/data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

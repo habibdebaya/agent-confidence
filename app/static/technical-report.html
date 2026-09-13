@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="The derivation, evidence, reproducible examples, and failure cases of a preliminary ERC-8004 agent confidence score.">
+  <title>Technical report · Agent Confidence</title>
+  <link rel="stylesheet" href="../static/site.css">
+  <script src="../static/report.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <header class="header"><a class="brand" href="../"><span>Agent Confidence<small>ERC-8004 RESEARCH</small></span></a><nav aria-label="Main navigation"><a href="../">Agent assessment</a><a data-repo-link hidden target="_blank" rel="noopener">GitHub ↗</a></nav></header>
+  <main class="report">
+    <p class="eyebrow">Technical report · Version 0.1</p>
+    <h1>Reviewer dependence and confidence scoring in ERC-8004</h1>
+    <p class="lead">An empirical implementation of group-level rating aggregation with an explicit uncertainty reserve.</p>
+    <p class="report-meta">Habib Debaya<br>Base snapshot: 3 September 2026, 07:40:05 UTC · Block 50,815,929<br>Method: source-reserve-0.1 · Payment optional · Reserve m = 4</p>
+    <p>This report studies a score derived from public agent quality ratings and observed relationships between reviewer addresses. Its mathematical core is the worst-case average of observed group contributions and four hypothetical adverse sources. The result is a conservative index of recorded rating support. It is not a calibrated probability of successful work, an identity verification, or a guarantee against fabricated accounts.</p>
+    <nav class="toc" aria-label="Report contents"><a href="#problem">I · Problem and evidence</a><a href="#derivation">II · Mathematical derivation</a><a href="#properties">III · Properties and limits</a><a href="#coverage">IV · Real-data results</a><a href="#experiments">V · Synthetic challenges</a><a href="#sensitivity">VI · Reserve sensitivity</a><a href="#reproduce">VII · Reproduction</a><a href="#sources">VIII · Sources and attribution</a></nav>
+
+    <section id="problem">
+      <h2>I · The evidence behind a rating</h2>
+      <p>A large number of favorable records can reflect repeated statements by the same source. Several wallet addresses may also have recorded relationships. Counting every record as an independent observation can therefore give an exaggerated impression of support.</p>
+      <p>ERC-8004 feedback is a signed numeric value with optional tags; the specification gives examples with different meanings and units. We restrict this version to <code>starred</code>, the specification's explicit 0–100 quality-rating example. Uptime, risk, revenue, and unknown scales do not enter this score. <a href="https://eips.ethereum.org/EIPS/eip-8004#examples-of-value--valuedecimals" target="_blank" rel="noopener">ERC-8004 specification ↗</a></p>
+      <p>The input is the saved Base collection. At the snapshot block, we retain active feedback, normalize the fixed-point value using its declared decimals, and require a finite value in [0, 100]. Values outside that range are excluded rather than clipped. We pool <code>starred</code> subtags in this preliminary version. That assumes their quality judgments can be compared, even when tasks or reviewer standards differ.</p>
+      <h3>Observed relationships</h3>
+      <p>The grouping implementation joins recorded funding paths, current agent owners and declared wallets, and certain recent payment cycles. Known external funding roots are exempt from funding-based merging. Cycle grouping uses a 30-day window, a maximum three-hop path, and a return-ratio threshold of 0.8. These are heuristics for dependence, not proof of common ownership. The score excludes ratings whose reviewer group contains the agent's current owner.</p>
+      <p>Group assignments are recomputed from the canonical records and checked against the saved reviewer assignments. All group sizes are retained when identifying relationships with agent owners. This procedure excludes 293 owner-linked quality ratings.</p>
+      <h3>Payment evidence is contextual</h3>
+      <p>A direct match requires a captured, authorized, positive USDC transfer from the exact reviewer to a wallet uniquely attributed to the reviewed agent at the payment block, strictly before feedback. The build independently replays those matches and rechecks the recipient's declaration interval. Payments are not required for a rating to qualify and do not change the numerical score.</p>
+      <p>This preserves a useful distinction: feedback states an opinion; a matched transfer establishes a prior payment relationship. The collection tracks selected declared wallets and shared escrow infrastructure. Missing attribution does not establish that no payment occurred. Even a matched transfer does not establish service completion or prevent returned funds.</p>
+    </section>
+
+    <section id="derivation">
+      <h2>II · Definition and derivation</h2>
+      <p>Let x<sub>i</sub> ∈ [0, 1] be an admitted quality rating divided by 100. Partition admitted reviewers into the G observed groups. Each group contributes its lowest rating:</p>
+      <div class="equation">r<sub>g</sub> = min<sub>i ∈ g</sub> x<sub>i</sub><small>One group contributes at most one unit of support, regardless of its review count.</small></div>
+      <p>The minimum is deliberately conservative. Repeating a favorable rating cannot raise a group's contribution, and adding positive wallets to a known group cannot erase an existing low rating. A consequence is vulnerability to an admitted negative review inside a group. Revocation can also remove an earlier low rating; the duplication property applies to a fixed active evidence set.</p>
+      <p>Write S = Σ<sub>g</sub> r<sub>g</sub>. A plain group mean, S/G, can equal one with just a single favorable source. To constrain sparse evidence, augment the observed groups with m hypothetical sources whose ratings u<sub>j</sub> are unknown. Compute the lowest average over all their possible values:</p>
+      <div class="equation">C<sub>m</sub> = 100 min<sub>u ∈ [0,1]<sup>m</sup></sub> (S + Σ<sub>j</sub> u<sub>j</sub>) / (G + m)<br>= 100 S / (G + m)</div>
+      <p>The minimum occurs at u<sub>j</sub> = 0 for every reserved source. This is a worst-case calculation for that explicitly defined augmented sample. It does not establish a statistical lower confidence bound on an agent's true performance.</p>
+      <p>Equivalently, for G &gt; 0, the score is the mean group rating multiplied by G/(G+m), a scarcity penalty. We set C = 0 when G = 0 and explain the lack of qualifying support. An unknown agent receives no assessment.</p>
+      <p class="note"><strong>Reserve parameter.</strong> The default m = 4 means one perfect source yields 20/100, four yield 50/100, and sixteen yield 80/100. This is a disclosed policy choice, not a fitted or empirically calibrated constant. The sensitivity section exposes its effect.</p>
+    </section>
+
+    <section id="properties">
+      <h2>III · Conditional mathematical properties</h2>
+      <p>These properties hold conditional on the admitted records and fixed group assignments:</p>
+      <ul>
+        <li><strong>Bounded range.</strong> Since 0 ≤ S ≤ G and m &gt; 0, 0 ≤ C ≤ 100G/(G+m) &lt; 100 for a finite sample.</li>
+        <li><strong>Duplication invariance.</strong> Repeating an existing rating changes neither a group minimum nor the group count.</li>
+        <li><strong>No inflation inside an existing group.</strong> An added rating can only leave the group's minimum unchanged or lower it.</li>
+        <li><strong>Bounded fixed-group influence.</strong> Replacing one group contribution changes C by at most 100/(G+m) points, holding G fixed.</li>
+        <li><strong>Explicit response to a new source.</strong> Adding a new group with contribution r changes the score by 100[r(G+m) − S]/[(G+m)(G+m+1)]. Favorable evidence increases it when r &gt; S/(G+m).</li>
+      </ul>
+      <p>These guarantees do not identify independent people. Undetected fabricated groups can accumulate support and drive the score toward 100. Incorrectly merging honest users can suppress support. Group merging itself has no general monotonicity guarantee because both S and G change. Grouping quality is therefore a central unresolved dependency.</p>
+    </section>
+
+    <section id="coverage">
+      <h2>IV · Results on the saved Base data</h2>
+      <div class="scroll-table"><table><thead><tr><th>Quantity</th><th>Count</th></tr></thead><tbody>
+        <tr><td>Registered agents</td><td>84,376</td></tr><tr><td>Agents with active feedback</td><td>29,738</td></tr><tr><td>Active feedback records</td><td>461,035</td></tr><tr><td>In-range starred ratings</td><td>11,406 across 286 agents</td></tr><tr><td>Admitted ratings after owner-group exclusion</td><td>11,113</td></tr><tr><td>Agents with a nonzero score</td><td><strong>226</strong></td></tr><tr><td>Agents with a score ≥ 50</td><td><strong>5</strong></td></tr><tr><td>Maximum score</td><td>87.6471</td></tr><tr><td>Prior direct payment matches, across all feedback types</td><td>15 records across 11 agents</td></tr>
+      </tbody></table></div>
+      <p>Of the 286 agents with in-range quality ratings, 59 have no admitted groups after ownership exclusion. One further agent's admitted group minima provide zero support. Most registrations have no qualifying quality ratings at all. The 50-point threshold above is a descriptive count, not a validated decision threshold.</p>
+      <h3>Agent-level results</h3>
+      <div class="scroll-table"><table><thead><tr><th>Agent</th><th>Admitted ratings</th><th>Groups G</th><th>Support S</th><th>Score</th></tr></thead><tbody>
+        <tr><td><a href="../?agent=51085">Surf AI · #51085</a></td><td>53</td><td>30</td><td>29.8</td><td>87.6471</td></tr>
+        <tr><td><a href="../?agent=51120">Plinky X Analys · #51120</a></td><td>8</td><td>8</td><td>7.86</td><td>65.5</td></tr>
+        <tr><td><a href="../?agent=47215">EconDash · #47215</a></td><td>1</td><td>1</td><td>0.8</td><td>16</td></tr>
+        <tr><td><a href="../?agent=25975">Botoshi · #25975</a></td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      </tbody></table></div>
+      <p>Surf AI's calculation is 100 × 29.8/(30+4). Its favorable rating support does not establish that these groups represent independent customers or that the service works. EconDash has a captured prior payment match, displayed as contextual evidence. Botoshi has 305,509 active feedback records, with no admitted <code>starred</code> quality ratings. Its zero reflects this method's narrow evidence policy.</p>
+      <p>A stricter payment-gated alternative leaves only six agents with positive scores, between 16 and 20. The payment-optional policy increases coverage while retaining vulnerability to undetected fabricated sources. Broadly pooling other numeric tags would change what the score measures and is outside this version.</p>
+    </section>
+
+    <section id="experiments">
+      <h2>V · Synthetic evaluation</h2>
+      <p>These are deterministic synthetic cases. The initial history contains two source groups rating the target 40 and 60. The plain mean is 50; the proposed score is 100 × (0.4+0.6)/(2+4) = 16.6667. Both columns use the same submitted records. Group labels are supplied by the experiment, so these tests evaluate aggregation behavior conditional on those labels.</p>
+      <div class="scroll-table"><table><thead><tr><th>Added evidence</th><th>Plain mean</th><th>Confidence index</th></tr></thead><tbody>
+        <tr><td>None</td><td>50.0000</td><td>16.6667</td></tr><tr><td>1,000 repetitions of the 60-rating review</td><td>59.9800</td><td>16.6667</td></tr><tr><td>1,000 perfect ratings in the existing 60-rating group</td><td>99.9002</td><td>16.6667</td></tr><tr><td>1,000 perfect ratings linked to the agent</td><td>99.9002</td><td>16.6667</td></tr><tr><td class="failure">1,000 undetected unpaid reviewer groups</td><td>99.9002</td><td class="failure">99.5030</td></tr><tr><td class="failure">100 undetected paid reviewer groups</td><td>99.0196</td><td class="failure">95.2830</td></tr><tr><td class="failure">One zero rating inserted into the 60-rating group</td><td>33.3333</td><td class="failure">6.6667</td></tr>
+      </tbody></table></div>
+      <div class="experiment-controls" id="experimentControls" hidden><label for="experimentCase">Inspect a synthetic case</label><select id="experimentCase"></select></div>
+      <figure class="experiment-figure" id="experimentFigure" hidden><div id="experimentBars"></div><figcaption id="experimentCaption"></figcaption></figure>
+      <p>The unchanged results establish a narrow benefit over record-level averaging under known dependencies. The two inflation failures show that a scarce-resource or identity guarantee has not been established. Reused payment evidence does not add numerical weight, and returned or circular transfers are relevant only when the grouping heuristic detects a relationship.</p>
+      <p>Ten hypothetical source groups each rating 90 produce 64.2857. One hundred produce 86.5385. These illustrate evidence growth; they are not observations of real customers or evidence that an attacker cannot create those groups.</p>
+    </section>
+
+    <section id="sensitivity">
+      <h2>VI · Sensitivity to the reserve parameter</h2>
+      <p>Increasing m lowers the score without changing any evidence. The table holds S and G fixed.</p>
+      <div class="scroll-table"><table><thead><tr><th>Example</th><th>m = 1</th><th>m = 4</th><th>m = 10</th></tr></thead><tbody><tr><td>Surf AI, S = 29.8, G = 30</td><td>96.13</td><td>87.65</td><td>74.50</td></tr><tr><td>Plinky X Analys, S = 7.86, G = 8</td><td>87.33</td><td>65.50</td><td>43.67</td></tr><tr><td>EconDash, S = 0.8, G = 1</td><td>40.00</td><td>16.00</td><td>7.27</td></tr></tbody></table></div>
+      <p>Future validation should challenge tag comparability, inspect the reviewers behind high scores, measure false merges and missed relationships, and compare the index with independently observed task outcomes. Until such outcomes are available, the score's probability interpretation remains unestablished.</p>
+    </section>
+
+    <section id="reproduce">
+      <h2>VII · Reproduce the result</h2>
+      <p>The public bundle contains a searchable agent catalogue, all 11,406 in-range quality-rating inputs with recorded groups, the 15 direct payment matches, and the computed outputs. It omits raw RPC responses, off-chain documents, and credentials. Agent names are display labels from registrations, truncated to 160 characters; address search uses current owners and active declared wallets at the snapshot.</p>
+      <p class="report-links"><a href="../static/data/snapshot.json" download>Snapshot, scores, and experiment results</a> · <a href="../static/data/evidence.json" download>Scoring inputs</a> · <a href="../static/data/catalogue.json" download>Agent catalogue</a></p>
+      <p>From a repository checkout:</p>
+      <pre><code>make install
+make confidence-check
+make test
+make site
+python3 -m http.server 8000 --directory dist</code></pre>
+      <p><code>make confidence-check</code> reconstructs every published score from the bundled inputs, checks catalogue and evidence hashes, verifies totals, and reruns the synthetic cases. This replay requires no RPC credentials. It verifies the transformation of the published records, not their completeness relative to the blockchain.</p>
+      <p><code>make confidence-data</code> rebuilds the bundle from the local canonical Parquet datasets and saved grounding. That path reads canonical registrations and wallet history, recomputes the full grouping, checks feedback keys, and independently reconciles prior payments with uniquely declared wallet intervals. SHA-256 fingerprints of its source files are recorded in the snapshot manifest. The collection commands and their configuration are described in the repository's data documentation. Collection requires network credentials.</p>
+      <p>The implementation is in <code>trustlayer/confidence.py</code>, the export and replay in <code>eval/confidence.py</code>, and the synthetic challenges in <code>sim/confidence.py</code>. The homepage displays the Python-generated scores from the versioned snapshot bundle.</p>
+    </section>
+
+    <section id="sources">
+      <h2>VIII · Sources and attribution</h2>
+      <p>The <a href="https://eips.ethereum.org/EIPS/eip-8004" target="_blank" rel="noopener">ERC-8004 specification</a> supplies the registry interface and explicit <code>starred</code> scale. Public Base registry events, wallet declarations, and captured USDC events supply the records used here.</p>
+      <p><a href="https://arxiv.org/abs/2606.26028" target="_blank" rel="noopener">Xiong et al., “Can Trustless Agents Be Trusted? An Empirical Study of the ERC-8004 Decentralized AI Agent Ecosystem”</a>, motivates examining semantic incompatibility, payment grounding, and manufactured feedback. This repository's earlier collection and reproduction work follows that study; the current snapshot extends beyond its observation window. Its reported percentages are not used as this prototype's measurements.</p>
+      <p>The method combines a group minimum with a worst-case mean over a specified augmented sample. The contribution is an implementation and evaluation of this evidence policy on a public registry snapshot, accompanied by complete scoring inputs, conditional mathematical properties, and reproducible counterexamples.</p>
+    </section>
+  </main>
+  <footer class="footer"><span><a href="../">Agent assessment</a></span><span>Version 0.1 · source-reserve-0.1</span></footer>
+</div>
+</body>
+</html>

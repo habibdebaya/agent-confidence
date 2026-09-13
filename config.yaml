@@ -1,0 +1,76 @@
+paths:
+  raw: data/raw
+  parquet: data/parquet
+  reports: reports
+
+contracts:
+  identity: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+  reputation: "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63"
+
+chains:
+  eth:
+    chain_id: 1
+    rpc_url: "${ETH_RPC_URL}"
+    explorer_api_url: "https://api.etherscan.io/v2/api"
+    start_block: 24339000
+    paper_end_block: 25089000
+    chunk_size: 5000
+    native_symbol: ETH
+    price_symbol: ETHUSDT
+    usdc: "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    usdc_decimals: 6
+    blocks_per_day: 7200
+  base:
+    chain_id: 8453
+    rpc_url: "${BASE_RPC_URL}"
+    log_rpc_url: "https://mainnet.base.org"
+    receipt_rpc_url: "https://mainnet-preconf.base.org"
+    auxiliary_rpc_urls:
+      - "https://mainnet.base.org"
+      - "https://developer-access-mainnet.base.org"
+      - "https://gateway.tenderly.co/public/base"
+      - "https://base-public.nodies.app"
+      - "https://api.zan.top/base-mainnet"
+      - "https://8453.rpc.thirdweb.com"
+      - "https://base-mainnet.public.blastapi.io"
+      - "https://base-mainnet.gateway.tatum.io"
+      - "https://base.api.onfinality.io/public"
+    explorer_api_url: "https://api.etherscan.io/v2/api"
+    transaction_api_url: ""
+    start_block: 41663700
+    paper_end_block: 45959820
+    chunk_size: 10000
+    native_symbol: ETH
+    price_symbol: ETHUSDT
+    usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    usdc_decimals: 6
+    blocks_per_day: 43200
+  bsc:
+    chain_id: 56
+    rpc_url: "${BSC_RPC_URL}"
+    explorer_api_url: "https://api.etherscan.io/v2/api"
+    start_block: 79027200
+    paper_end_block: 98121735
+    chunk_size: 5000
+    native_symbol: BNB
+    price_symbol: BNBUSDT
+    usdc: "0x8AC76a51cc950d9822D68b83Fe1Ad97B32Cd580d"
+    usdc_decimals: 18
+    blocks_per_day: 28800
+
+explorer_api_key: "${ETHERSCAN_API_KEY}"
+ipfs_gateways:
+  - "https://ipfs.io/ipfs/{cid}"
+  - "https://cloudflare-ipfs.com/ipfs/{cid}"
+  - "https://gateway.pinata.cloud/ipfs/{cid}"
+
+trust:
+  circular_window_days: 30
+  circular_max_hops: 3
+  circular_return_ratio: 0.8
+
+semantics:
+  model: gpt-5.4
+  use_llm: false
+  min_count: 10
+  map_path: semantics/tag_map.json

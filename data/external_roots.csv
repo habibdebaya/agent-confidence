@@ -1,0 +1,5 @@
+address,label,type
+0x28c6c06298d514db089934071355e5743bf21d60,Binance 14,cex
+0x21a31ee1afc51d94c2efccaa2092ad1028285549,Binance 15,cex
+0x3154cf16ccdb4c6d922629664174b904d80f2c35,Base L1 Standard Bridge,bridge
+0x4200000000000000000000000000000000000010,Base L2 Standard Bridge,bridge
