@@ -2,7 +2,7 @@
 
 [Habib Debaya](https://habibdebaya.github.io/)
 
-[Web demonstration](https://habibdebaya.github.io/erc8004-agent-confidence/) · [Technical report](https://habibdebaya.github.io/erc8004-agent-confidence/technical-report/) · [Reproduction](#reproduction)
+[Web demonstration](https://habibdebaya.github.io/agent-confidence/) · [Technical report](https://habibdebaya.github.io/agent-confidence/technical-report/) · [Reproduction](#reproduction)
 
 This repository studies the aggregation of agent quality ratings when observations may be repeated, reviewers may be related, and independent evidence is limited. It implements a confidence index based on the minimum rating within each observed reviewer group and an explicit uncertainty reserve. The accompanying web application provides agent-level calculations, supporting records, and contextual payment evidence.
 

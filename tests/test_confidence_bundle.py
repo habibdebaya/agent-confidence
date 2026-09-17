@@ -41,6 +41,7 @@ def test_static_asset_urls_change_with_content(tmp_path, monkeypatch, asset):
     root = tmp_path / 'project'
     source = root / 'app/static'
     shutil.copytree(ROOT / 'app/static', source)
+    shutil.copytree(ROOT / 'app/animation', root / 'app/animation')
     monkeypatch.setattr(static_build, 'ROOT', root)
     destination = tmp_path / 'site'
 

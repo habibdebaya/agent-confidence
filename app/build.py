@@ -11,9 +11,16 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = {
     'index.html': 'index.html',
     'technical-report.html': 'technical-report/index.html',
+    'animation/reviewer-manipulation.gif': 'static/animation/reviewer-manipulation.gif',
     **{name: 'static/' + name for name in ('site.css', 'site.js', 'report.js',
                                          'data/snapshot.json', 'data/catalogue.json', 'data/evidence.json')},
 }
+
+
+def asset_source(root: Path, name: str) -> Path:
+    if name == 'animation/reviewer-manipulation.gif':
+        return root / 'app' / name
+    return root / 'app/static' / name
 
 
 def build(destination: Path, repo_url: str = '') -> Path:
@@ -29,10 +36,10 @@ def build(destination: Path, repo_url: str = '') -> Path:
                       if path.is_file() and str(path.relative_to(destination)) not in permitted]
         if unexpected:
             raise ValueError('export directory contains unexpected files; choose an empty directory')
-    asset_versions = {name: sha256((source / name).read_bytes()).hexdigest()[:12]
-                      for name in FILES if name.endswith(('.css', '.js'))}
+    asset_versions = {name: sha256(asset_source(ROOT, name).read_bytes()).hexdigest()[:12]
+                      for name in FILES if name.endswith(('.css', '.js', '.gif'))}
     for name, target in FILES.items():
-        content = (source / name).read_bytes()
+        content = asset_source(ROOT, name).read_bytes()
         if name.endswith('.html'):
             for asset, version in asset_versions.items():
                 content = content.replace(f'static/{asset}"'.encode(), f'static/{asset}?v={version}"'.encode())
@@ -48,7 +55,7 @@ def build(destination: Path, repo_url: str = '') -> Path:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--destination', type=Path, default=ROOT / 'dist')
-    repository = os.environ.get('GITHUB_REPOSITORY', 'habibdebaya/erc8004-agent-confidence')
+    repository = os.environ.get('GITHUB_REPOSITORY', 'habibdebaya/agent-confidence')
     parser.add_argument('--repo-url', default='https://github.com/' + repository if repository else '')
     args = parser.parse_args()
     print(build(args.destination, args.repo_url))

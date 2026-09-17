@@ -33,7 +33,7 @@ erc8004-serve = "app.main:run"
 include = ["app*", "crawl*", "trustlayer*", "sim*", "eval*"]
 
 [tool.setuptools.package-data]
-app = ["static/*.html", "static/*.css", "static/*.js", "static/data/*.json"]
+app = ["animation/*.gif", "static/*.html", "static/*.css", "static/*.js", "static/data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

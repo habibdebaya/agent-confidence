@@ -24,9 +24,9 @@ def experiments() -> list[dict]:
         ("reused_payment", "1,000 repetitions of one paid review", baseline + [review("b", 60)] * 1000, "Reusing the same reviewer and payment leaves group contributions unchanged."),
         ("linked_wallets", "1,000 positive reviews in an existing group", baseline + [review(f"linked:{i}", group="b") for i in range(1000)], "All added reviewers are assumed correctly linked to group b."),
         ("known_self", "1,000 reviews linked to the agent", baseline + [review(f"self:{i}", group="target") for i in range(1000)], "Correctly identified agent-linked groups are excluded."),
-        ("hidden_paid", "100 undetected paid reviewer groups", baseline + [review(f"hidden:{i}") for i in range(100)], "Failure: payment evidence does not prevent inflation by undetected new groups; circular transfers do not affect this formula unless grouping captures the relationships."),
+        ("hidden_paid", "100 undetected paid reviewer groups", baseline + [review(f"hidden:{i}") for i in range(100)], "Failure: payment evidence does not prevent inflation by undetected new groups. Circular transfers do not affect this formula unless grouping captures the relationships."),
         ("group_poisoning", "One negative review in a source group", baseline + [review("poison", 0, group="b")], "Failure: an admitted zero rating lowers the whole group's contribution."),
-        ("ten_sources", "Ten favorable source groups", [review(f"source:{i}", 90) for i in range(10)], "An illustrative evidence-growth case; group independence is an assumption."),
+        ("ten_sources", "Ten favorable source groups", [review(f"source:{i}", 90) for i in range(10)], "This case illustrates evidence growth under assumed group independence."),
         ("hundred_sources", "One hundred favorable source groups", [review(f"source:{i}", 90) for i in range(100)], "Additional favorable groups reduce the reserve's relative effect."),
     ]
     return [{"id": key, "name": name, "reviews": len(rows), "raw_mean": mean(r["rating"] for r in rows),

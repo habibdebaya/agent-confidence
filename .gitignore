@@ -1,4 +1,3 @@
-# Only the listed paths are eligible for tracking.
 /*
 !/.gitignore
 !/.dockerignore
@@ -19,9 +18,12 @@
 !/docs/
 !/data/
 
-# Application source and the assets used by the public demonstration.
 /app/*
 !/app/*.py
+!/app/animation/
+/app/animation/*
+!/app/animation/render.py
+!/app/animation/reviewer-manipulation.gif
 !/app/static/
 /app/static/*
 !/app/static/index.html
@@ -35,7 +37,6 @@
 !/app/static/data/catalogue.json
 !/app/static/data/evidence.json
 
-# Collection, scoring, reconstruction, and experiment source.
 /crawl/*
 !/crawl/*.py
 /trustlayer/*
@@ -48,7 +49,6 @@
 !/tests/test_*.py
 !/tests/browser_confidence.cjs
 
-# Public documentation and the fixed funding-label input.
 /docs/*
 !/docs/data.md
 !/docs/technical-report.md
@@ -60,7 +60,6 @@
 /.github/workflows/*
 !/.github/workflows/pages.yml
 
-# Credentials, local guidance, and generated files remain excluded everywhere.
 .env
 .env.*
 !.env.example
@@ -68,6 +67,7 @@ AGENTS.md
 .local/
 .agents/
 .codex/
+/.learning/
 erc8004-private/
 __pycache__/
 *.py[cod]

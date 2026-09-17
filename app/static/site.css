@@ -111,6 +111,9 @@ code{font-size:.82em;overflow-wrap:anywhere}
 .report table{font-size:12px;margin:15px 0}
 .report .note{padding:16px 20px;border-left:3px solid var(--accent);background:var(--wash);font-size:15px}
 .report pre{background:var(--wash);padding:17px;font-size:12px;overflow-x:auto}
+.rating-animation{max-width:540px;margin:28px auto}
+.rating-animation img{display:block;width:100%;height:auto}
+.rating-animation figcaption{margin-top:12px;font-size:14px;color:var(--muted);line-height:1.8}
 .experiment-controls{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:22px 0}
 .experiment-controls label{font-size:12px;margin:0}
 .experiment-controls select{max-width:100%;min-width:0;padding:7px;border:1px solid var(--line);background:white;color:var(--ink);font:12px var(--sans)}

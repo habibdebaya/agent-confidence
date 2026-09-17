@@ -6,11 +6,11 @@ Method: `source-reserve-0.1` · Reserve: $m=4$
 
 ## Abstract
 
-Public agent feedback can contain repeated observations, related reviewers, and incompatible numeric scales. This report evaluates a confidence index that aggregates quality ratings by observed reviewer group and introduces an explicit reserve for limited evidence. Each group contributes its minimum eligible rating. The score is the worst-case average of those contributions and four hypothetical sources with unknown ratings. On the saved Base snapshot, 226 of 84,376 registered agents receive nonzero scores, with five scores at or above 50. Synthetic experiments establish duplication invariance under fixed group assignments and demonstrate substantial inflation from undetected fabricated groups. The index measures recorded rating support; its interpretation as a probability of successful service delivery has not been established.
+Public agent feedback can contain repeated observations, related reviewers, and incompatible numeric scales. This report evaluates a confidence index that aggregates quality ratings by observed reviewer group and introduces an explicit reserve for limited evidence. Each group contributes its minimum eligible rating. The score is the worst-case average of those contributions and four hypothetical sources with unknown ratings. On the saved Base snapshot, 226 of 84,376 registered agents receive nonzero scores, with five scores at or above 50. Synthetic experiments establish duplication invariance under fixed group assignments and demonstrate substantial inflation from undetected fabricated groups. The index measures recorded rating support. Its interpretation as a probability of successful service delivery has not been established.
 
 ## I. Evidence policy
 
-The [ERC-8004 specification](https://eips.ethereum.org/EIPS/eip-8004#examples-of-value--valuedecimals) permits feedback with different meanings and units. This implementation uses its `starred` quality-rating example, with a numeric range of 0–100. Active feedback is evaluated at the snapshot block. Fixed-point values are normalized using their declared decimals; nonfinite and out-of-range values are excluded. Other primary tags do not enter the score. Pooling `starred` subtags assumes comparable quality judgments across tasks and reviewers.
+The [ERC-8004 specification](https://eips.ethereum.org/EIPS/eip-8004#examples-of-value--valuedecimals) permits feedback with different meanings and units. This implementation uses its `starred` quality-rating example, with a numeric range of 0–100. Active feedback is evaluated at the snapshot block. Fixed-point values are normalized using their declared decimals, and nonfinite and out-of-range values are excluded. Other primary tags do not enter the score. Pooling `starred` subtags assumes comparable quality judgments across tasks and reviewers.
 
 The grouping procedure joins addresses using recorded funding paths, ownership and declared-wallet relationships, and selected payment cycles. Known external funding roots are exempt from funding-based merging. Cycle detection uses a 30-day window, a maximum three-hop path, and a return-ratio threshold of 0.8. These relationships provide a heuristic partition. They do not establish common ownership or independent human identities.
 
@@ -67,7 +67,7 @@ $$
 
 The score increases precisely when $r>S/(G+m)$. An unlimited supply of undetected groups rating one drives it toward 100.
 
-These properties do not establish that observed groups correspond to independent sources. Group merging has no general monotonicity guarantee because both $S$ and $G$ change. False merges can suppress support; missed relationships permit inflation. Revocation can remove a previous group minimum, so duplication invariance does not imply invariance to changes in the active evidence set.
+These properties do not establish that observed groups correspond to independent sources. Group merging has no general monotonicity guarantee because both $S$ and $G$ change. False merges can suppress support, while missed relationships permit inflation. Revocation can remove a previous group minimum, so duplication invariance does not imply invariance to changes in the active evidence set.
 
 ## IV. Snapshot results
 
@@ -97,7 +97,11 @@ Surf AI's calculation is $100\times29.8/(30+4)$. Its favorable recorded support 
 
 ## V. Synthetic evaluation
 
-The initial history contains two groups rating a target 40 and 60. The arithmetic mean is 50; the proposed score is $100\times(0.4+0.6)/(2+4)=16.6667$. Both columns below use the same submitted records. Group assignments are supplied by the experiment, so these cases test aggregation behavior conditional on those assignments.
+The initial history contains two groups rating a target 40 and 60. The arithmetic mean is 50, and the proposed score is $100\times(0.4+0.6)/(2+4)=16.6667$. Both columns below use the same submitted records. Group assignments are supplied by the experiment, so these cases test aggregation behavior conditional on those assignments.
+
+![Resisting coordinated rating manipulation in agentic markets](../app/animation/reviewer-manipulation.gif)
+
+Adding 1,000 perfect ratings to an existing reviewer group raises the average to 99.9 while the adjusted score remains 16.7.
 
 | Additional observations | Arithmetic mean | Confidence index |
 |---|---:|---:|
@@ -111,7 +115,7 @@ The initial history contains two groups rating a target 40 and 60. The arithmeti
 
 The unchanged scores illustrate resistance to repetition and favorable submissions within known groups. The inflation cases demonstrate the unresolved dependence on group detection. Payment labels provide no additional resistance because they have no numerical weight. An adverse rating inside a group demonstrates suppression through the minimum operator.
 
-Ten hypothetical groups each rating 90 yield 64.2857; one hundred yield 86.5385. These examples illustrate evidence growth under supplied group labels. They do not establish that the corresponding sources are costly to fabricate.
+Ten hypothetical groups each rating 90 yield 64.2857, while one hundred yield 86.5385. These examples illustrate evidence growth under supplied group labels. They do not establish that the corresponding sources are costly to fabricate.
 
 ## VI. Parameter sensitivity and limitations
 
@@ -137,13 +141,13 @@ make site
 python3 -m http.server 8000 --directory dist
 ```
 
-The [public evidence bundle](data.md) contains all scoring inputs, group assignments, contextual payment matches, and output fingerprints. The replay reconstructs every score, checks the public input hashes and totals, and reruns the synthetic experiments without RPC credentials. This verifies the transformation of included inputs; it does not independently verify collection completeness.
+The [public evidence bundle](data.md) contains all scoring inputs, group assignments, contextual payment matches, and output fingerprints. The replay reconstructs every score, checks the public input hashes and totals, and reruns the synthetic experiments without RPC credentials. This verifies the transformation of included inputs. It does not independently verify collection completeness.
 
 The scoring function is in [trustlayer/confidence.py](../trustlayer/confidence.py), the exporter and replay are in [eval/confidence.py](../eval/confidence.py), and the synthetic cases are in [sim/confidence.py](../sim/confidence.py). Canonical reconstruction additionally recomputes groups and reconciles payment matches with declared-wallet intervals. [Data and reconstruction](data.md) describes the required sources and collection commands.
 
 ## VIII. Sources and attribution
 
 - [ERC-8004: Trustless Agents](https://eips.ethereum.org/EIPS/eip-8004) supplies the registry interfaces and the explicit `starred` scale.
-- [Xiong et al., *Can Trustless Agents Be Trusted? An Empirical Study of the ERC-8004 Decentralized AI Agent Ecosystem*](https://arxiv.org/abs/2606.26028) provides empirical context for feedback semantics, payment grounding, and manufactured reputation. The collection and reproduction code follows that study; this snapshot extends beyond its observation window. Its aggregate percentages are not used as measurements of this implementation.
+- [Xiong et al., *Can Trustless Agents Be Trusted? An Empirical Study of the ERC-8004 Decentralized AI Agent Ecosystem*](https://arxiv.org/abs/2606.26028) provides empirical context for feedback semantics, payment grounding, and manufactured reputation. The collection and reproduction code follows that study, and this snapshot extends beyond its observation window. Its aggregate percentages are not used as measurements of this implementation.
 
 The contribution is an implementation and evaluation of a specified evidence policy, with complete scoring inputs, conditional mathematical properties, and reproducible counterexamples.

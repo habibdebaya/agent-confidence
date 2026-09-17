@@ -3,18 +3,18 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
-from app.build import FILES
+from app.build import FILES, asset_source
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def create_app(root: str | Path = ROOT) -> FastAPI:
-    static = Path(root).resolve() / 'app/static'
+    root = Path(root).resolve()
     application = FastAPI(title='ERC-8004 Agent Confidence', docs_url=None, redoc_url=None, openapi_url=None)
 
     def document(name: str):
-        path = static / name
+        path = asset_source(root, name)
         if not path.is_file():
             raise HTTPException(404, 'Document unavailable')
         return FileResponse(path)
