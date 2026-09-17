@@ -10,9 +10,9 @@
   <a href="#reproduction">Reproduction</a>
 </p>
 
-Lots of positive reviews can come from the same source. This project looks at the evidence behind ERC-8004 agent ratings, groups related reviewers, and keeps scores cautious when there is little independent support.
+A high review count can reflect repeated feedback from the same source. This project looks at the evidence behind ERC-8004 agent ratings, groups related reviewers, and accounts for limited independent support.
 
-Try the demo to search by agent name, ID, or wallet address and see how each score adds up.
+Explore the demo to search by agent name, ID, or wallet address and see the evidence behind each score.
 
 <p align="center">
   <a href="https://habibdebaya.github.io/agent-confidence/">
@@ -23,16 +23,16 @@ Try the demo to search by agent name, ID, or wallet address and see how each sco
 ## How it works
 
 - Keep eligible `starred` ratings from 0 to 100 and exclude groups linked to the agent's owner.
-- Use the lowest rating from each observed reviewer group, so repeated praise within that group cannot raise its contribution.
+- Use the lowest rating from each observed reviewer group, so repeated positive ratings within that group cannot raise its contribution.
 - Add four hypothetical zero-rated sources to the average to account for limited evidence.
 
-Payment matches provide context without changing the score. Hidden reviewer relationships can still inflate scores, and incorrect grouping can push them down. The score measures support from recorded ratings. It does not predict the chance of successful service delivery.
+Payment matches provide context without changing the score. Hidden reviewer relationships can still inflate scores, and incorrect grouping can lower them. The score measures support from recorded ratings. It does not predict the chance of successful service delivery.
 
 <p align="center">
-  <img src="app/animation/reviewer-manipulation.gif" alt="Coordinated reviews raise the average rating while the adjusted score stays steady" width="440">
+  <img src="app/animation/reviewer-manipulation.gif" alt="Coordinated reviews raise the average rating while the adjusted score remains unchanged" width="440">
 </p>
 
-In this example, 1,000 perfect ratings added to an existing reviewer group push the average to 99.9. The adjusted score stays at 16.7. The [technical report](docs/technical-report.md) walks through the math and the cases where the method fails.
+In this example, 1,000 ratings of 100 added to an existing reviewer group raise the average to 99.9. The adjusted score remains at 16.7. The [technical report](docs/technical-report.md) explains the calculation and examines where the method fails.
 
 The demo uses a Base snapshot from 3 September 2026 with 84,376 agents and 461,035 active feedback records. Of those agents, 226 receive a nonzero score and five score at least 50.
 
