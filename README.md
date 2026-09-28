@@ -1,62 +1,86 @@
-<h1 align="center">Confidence Scoring for ERC-8004 Agents</h1>
+<h1 align="center">Tracing ERC-8004 Reviews</h1>
 
 <p align="center">
   <a href="https://habibdebaya.github.io/">Habib Debaya</a>
 </p>
 
 <p align="center">
-  <a href="https://habibdebaya.github.io/agent-confidence/">Live demo</a> ·
-  <a href="https://habibdebaya.github.io/agent-confidence/technical-report/">Technical report</a> ·
-  <a href="#reproduction">Reproduction</a>
+  <a href="https://habibdebaya.github.io/agent-confidence/">Live site</a> ·
+  <a href="#run-it-locally">Run it locally</a> ·
+  <a href="#data">Data</a>
 </p>
 
-A high review count can reflect repeated feedback from the same source. This project looks at the evidence behind ERC-8004 agent ratings, groups related reviewers, and accounts for limited independent support.
-
-Explore the demo to search by agent name, ID, or wallet address and see the evidence behind each score.
+Every ERC-8004 review on Base, traced to the wallet that left it and to where that wallet first got its money. Search any agent to see how many separate sources stand behind its reviews, with the transaction behind each one.
 
 <p align="center">
   <a href="https://habibdebaya.github.io/agent-confidence/">
-    <img src="docs/preview.png?v=48ae4526a3b0" alt="Agent confidence score with reviewer groups and supporting evidence" width="960">
+    <img src="docs/preview.png" alt="All reviews on Base split into six groups, and the most-reviewed agents with their independent wallets" width="960">
   </a>
 </p>
 
-## How it works
+## What it shows
 
-- Keep eligible `starred` ratings from 0 to 100 and exclude groups linked to the agent's owner.
-- Use the lowest rating from each observed reviewer group, so repeated positive ratings within that group cannot raise its contribution.
-- Add four hypothetical zero-rated sources to the average to account for limited evidence.
+Review counts on ERC-8004 are easy to inflate. Most of the 461,035 reviews on Base come from a wallet that had already reviewed the same agent, and the 13,178 wallets behind them come down to 4,912 separate sources. The site sorts every review into one of six groups.
 
-Payment matches provide context without changing the score. Hidden reviewer relationships can still inflate scores, and incorrect grouping can lower them. The score measures support from recorded ratings. It does not predict the chance of successful service delivery.
+- **Paying customer** paid the agent before reviewing it
+- **Independent** was funded by a wallet with no tie to any other reviewer
+- **Exchange or bridge** was first funded through an exchange, a bridge or a similar service, so funding cannot show who is behind it
+- **Linked by funding** got its first funds from the same place as other reviewers
+- **Mass reviewer** belongs to a source that reviewed 100 or more agents
+- **Linked to owner** is funded by or connected to the owner of the agent it reviewed
 
-<p align="center">
-  <img src="app/animation/reviewer-manipulation.gif" alt="Coordinated reviews raise the average rating while the adjusted score remains unchanged" width="440">
-</p>
+Each agent also shows its independent wallets, which counts the wallets in the first two groups once each, however many reviews they left.
 
-In this example, 1,000 ratings of 100 added to an existing reviewer group raise the average to 99.9. The adjusted score remains at 16.7. The [technical report](docs/technical-report.md) explains the calculation and examines where the method fails.
+## How wallets are linked
 
-The demo uses a Base snapshot from 3 September 2026 with 84,376 agents and 461,035 active feedback records. Of those agents, 226 receive a nonzero score and five score at least 50.
+Reviewer wallets join one source when one wallet gave them their first funds, when one funded another, when they are tied through agent ownership, or when they send USDC around a closed loop within 30 days. Exchanges and bridges never link wallets by funding alone. Wallets funded by the same exchange or bridge within one minute are linked only when they also reviewed the same agent. Known services are listed with their Basescan name tags in [data/funders.csv](data/funders.csv).
 
-## Try it locally
+A link records a shared money trail and nothing more. About 40% of reviewer wallets were first funded through an exchange, a bridge or a similar service, and for those the trail stops.
 
-Python 3 is enough to build and serve the demo. The data is included.
+## Run it locally
+
+Python 3 is enough to build and serve the site. The data is included.
 
 ```bash
 make site
 python3 -m http.server 8000 --directory dist
 ```
 
-Open [localhost:8000](http://localhost:8000/).
+Then [open the site](http://localhost:8000/) in your browser.
 
-## Reproduction
+## Reproduce
 
-With Python 3.11 or later:
+With Python 3.11 or later
 
 ```bash
 make install
-make confidence-check
+make check
 make test
 ```
 
-These commands install dependencies, rebuild every published score from the included evidence, and run the tests. No RPC credentials are needed. See the [data guide](docs/data.md) for collection and reconstruction details.
+`make check` rebuilds every label and total from the published files and verifies their fingerprints, with no RPC access needed.
 
-Built around [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004), with research context from [Can Trustless Agents Be Trusted?](https://arxiv.org/abs/2606.26028).
+## Data
+
+The snapshot is Base block 50,815,929, taken on 3 September 2026.
+
+| File | Contents |
+|---|---|
+| `app/static/data/meta.json` | Snapshot details, totals, most-reviewed agents, mass reviewers, payment matches and file fingerprints |
+| `app/static/data/agents.json` | Every registered agent with its owner, declared wallets and reviews per group |
+| `app/static/data/reviewers.json` | Every reviewer wallet with its source, first funder, funding transaction, link reason and the agents it reviewed |
+| `app/static/data/feedback/*.json` | Reviews for each agent, split by agent ID. Each wallet keeps its latest 50 reviews next to exact totals |
+
+Rebuilding the snapshot from the chain needs RPC access set in `.env` (see `.env.example`) and runs the crawler, then the build.
+
+```bash
+.venv/bin/erc8004 crawl --chain base --end-block 50815929
+.venv/bin/erc8004 offchain --chain base
+.venv/bin/erc8004 provenance --chain base --end-block 50815929
+.venv/bin/erc8004 infrastructure --chain base --end-block 50815929
+.venv/bin/erc8004 payments --chain base --end-block 50815929
+make grounding
+make data
+```
+
+Built on [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004), with research context from [Can Trustless Agents Be Trusted?](https://arxiv.org/abs/2606.26028)

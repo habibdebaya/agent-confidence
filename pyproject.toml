@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "erc8004-agent-confidence"
 version = "0.1.0"
-description = "Inspectable confidence scores and reputation experiments for ERC-8004 agents"
+description = "Every ERC-8004 review on Base, traced to the wallet behind it"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115,<0.116",
@@ -26,14 +26,14 @@ dev = ["pytest>=7.4", "pytest-cov>=5", "hypothesis>=6.100"]
 [project.scripts]
 erc8004 = "crawl.cli:main"
 erc8004-grounding = "eval.grounding:main"
-erc8004-confidence = "eval.confidence:main"
+erc8004-reviewmap = "eval.reviewmap:main"
 erc8004-serve = "app.main:run"
 
 [tool.setuptools.packages.find]
-include = ["app*", "crawl*", "trustlayer*", "sim*", "eval*"]
+include = ["app*", "crawl*", "trustlayer*", "eval*"]
 
 [tool.setuptools.package-data]
-app = ["animation/*.gif", "static/*.html", "static/*.css", "static/*.js", "static/data/*.json"]
+app = ["static/*.html", "static/*.css", "static/*.js", "static/*.png", "static/data/*.json", "static/data/feedback/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

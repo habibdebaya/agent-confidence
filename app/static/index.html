@@ -2,54 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="A reproducible study of confidence scoring for ERC-8004 agents using quality ratings, observed reviewer relationships, and an explicit uncertainty reserve.">
-  <title>ERC-8004 Agent Confidence | Research demonstration</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2336495a'/%3E%3Cpath d='M10 12h20L20 30z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="./static/site.css">
-  <script src="./static/site.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracing ERC-8004 Reviews</title>
+  <meta name="description" content="Every ERC-8004 review on Base, traced to the wallet behind it.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tracing ERC-8004 Reviews">
+  <meta property="og:description" content="Every ERC-8004 review on Base, traced to the wallet behind it.">
+  <meta property="og:url" content="https://habibdebaya.github.io/agent-confidence/">
+  <meta property="og:image" content="https://habibdebaya.github.io/agent-confidence/static/cover.png">
+  <meta property="og:image:width" content="2400">
+  <meta property="og:image:height" content="1260">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tracing ERC-8004 Reviews">
+  <meta name="twitter:description" content="Every ERC-8004 review on Base, traced to the wallet behind it.">
+  <meta name="twitter:image" content="https://habibdebaya.github.io/agent-confidence/static/cover.png">
+  <script>try { const theme = localStorage.getItem('theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch (error) {}</script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Ccircle cx='11' cy='11' r='4' fill='white'/%3E%3Ccircle cx='21' cy='21' r='4' fill='white'/%3E%3Cpath d='M11 11L21 21' stroke='white' stroke-width='2.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="static/site.css">
 </head>
 <body>
-<a class="skip" href="#lookup">Skip to agent lookup</a>
-<div class="page">
-  <header class="header">
-    <a class="brand" href="./"><span>Agent Confidence<small>ERC-8004 RESEARCH</small></span></a>
-    <nav aria-label="Main navigation"><a href="./technical-report/" target="_blank" rel="noopener">Technical report <span aria-hidden="true">↗</span></a><a data-repo-link hidden target="_blank" rel="noopener">GitHub ↗</a></nav>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./">Tracing ERC-8004 Reviews <span class="chain">Base</span></a>
+      <nav class="topnav" aria-label="Sections">
+        <a href="#labels">Colors</a>
+        <a data-repo-link hidden target="_blank" rel="noopener">GitHub</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch color theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v2.5M12 20v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M1.5 12H4M20 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
+        </button>
+      </nav>
+    </div>
   </header>
-  <main>
+
+  <main class="wrap">
     <section class="hero">
-      <p class="eyebrow">Research demonstration · Base registry snapshot</p>
-      <h1>Confidence scoring for ERC-8004 agents</h1>
-      <p class="intro">This study examines how recorded reviewer relationships and limited evidence affect the aggregation of agent quality ratings. The demonstration presents each score with its supporting records and mathematical interpretation.</p>
-      <p class="author-line"><a href="https://habibdebaya.github.io/" target="_blank" rel="noopener">Habib Debaya</a></p>
-      <div class="snapshot-line" id="snapshotLine">Loading the saved snapshot…</div>
+      <h1>Tracing ERC-8004 Reviews</h1>
+      <p class="lede">Every review on Base, traced to the wallet behind it.</p>
+      <form class="search" id="search" role="search" autocomplete="off">
+        <label class="sr-only" for="query">Search agents</label>
+        <input id="query" type="search" placeholder="Search an agent, owner, or wallet" spellcheck="false" aria-controls="results" aria-autocomplete="list">
+        <ul id="results" class="results" role="listbox" hidden></ul>
+        <p id="searchStatus" class="search-status" aria-live="polite"></p>
+      </form>
+      <p class="chips" id="chips"><span>Try</span></p>
     </section>
-    <section class="workspace" id="lookup" aria-label="Agent confidence lookup">
-      <aside class="selection">
-        <div class="section-label">Agent selection</div>
-        <form id="searchForm">
-          <label for="query">Name, agent ID, or Base address</label>
-          <div class="search-field"><input id="query" type="search" autocomplete="off" spellcheck="false" placeholder="Search the snapshot" required><button type="submit" aria-label="Search agents">→</button></div>
-        </form>
-        <div id="searchStatus" class="search-status" role="status"></div>
-        <div id="searchResults" class="search-results" aria-label="Search results" hidden></div>
-        <p class="small-label">Selected case studies</p>
-        <div id="examples" class="examples"></div>
-        <p class="selection-note">Names are declared by registrants. Address search matches recorded agent owners and active declared wallets.</p>
-        <a class="text-link" href="./technical-report/#coverage" target="_blank" rel="noopener">Dataset and coverage</a>
-      </aside>
-      <div class="assessment" id="assessment" aria-live="polite" aria-busy="true">
-        <p class="loading">Loading the selected case study…</p>
-      </div>
+
+    <section id="agent" class="agent" aria-live="polite"></section>
+
+    <section id="base" class="section">
+      <figure class="chart">
+        <figcaption>All reviews on Base</figcaption>
+        <div id="baseBar"></div>
+        <ul class="legend" id="baseLegend"></ul>
+      </figure>
+      <dl class="facts" id="facts"></dl>
     </section>
-    <section class="method-preview" aria-labelledby="methodTitle">
-      <div><p class="eyebrow">Method</p><h2 id="methodTitle">Reviewer groups and an uncertainty reserve</h2><p>Repeated submissions and relationships between reviewer addresses can create dependence among ratings. The method assigns one contribution to each observed group and adjusts the aggregate for an explicit reserve of hypothetical adverse sources.</p><a class="text-link" href="./technical-report/#derivation" target="_blank" rel="noopener">Mathematical derivation</a></div>
-      <div class="method-steps"><div><p><strong>Rating eligibility</strong>The calculation uses active <code>starred</code> ratings with values in [0, 100]. Other feedback types are excluded.</p></div><div><p><strong>Group contributions</strong>Each group contributes its minimum admitted rating. Groups linked to the agent's current owner are excluded.</p></div><div><p><strong>Regularization for limited evidence</strong>Total support is divided by the number of groups plus four. The report derives this reserve construction and examines its sensitivity.</p></div></div>
+
+    <section id="top" class="section">
+      <h2>Most-reviewed agents</h2>
+      <div class="top-head" aria-hidden="true"><span></span><span>Agent</span><span>What's behind the reviews</span><span>Independent wallets</span></div>
+      <ol class="top-list" id="topList"></ol>
     </section>
-    <section class="scope-banner"><strong>Interpretation and limitations</strong><p>The score is an uncalibrated index of support from recorded quality ratings. Prior payment matches are reported as contextual evidence and have no numerical weight. The guarantees are conditional on observed group assignments; coordinated reviewers with undetected relationships can inflate the score.</p></section>
+
+    <section id="labels" class="section">
+      <h2>What the colors mean</h2>
+      <ul class="key" id="labelRules"></ul>
+      <p class="fine">Wallets are linked by funding when one wallet gave several reviewers their first funds, when one reviewer funded another, or when the same exchange or bridge funded them within a minute and they reviewed the same agent. A link shows a relationship on chain. It does not show wrongdoing. <a data-issues-link hidden target="_blank" rel="noopener">Report a wrong label</a></p>
+    </section>
   </main>
-  <footer class="footer"><span><a href="https://habibdebaya.github.io/" target="_blank" rel="noopener">Habib Debaya ↗</a></span><span id="methodVersion">Source reserve · v0.1</span></footer>
-</div>
-<noscript><p class="noscript">JavaScript is required for agent lookup. The <a href="./technical-report/">technical report</a> can be read without it.</p></noscript>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p id="snapshotLine">Base snapshot</p>
+      <p>Built by <a href="https://habibdebaya.github.io/" target="_blank" rel="noopener">Habib Debaya</a>. Protocol by <a href="https://eips.ethereum.org/EIPS/eip-8004" target="_blank" rel="noopener">ERC-8004</a>. Research context from <a href="https://arxiv.org/abs/2606.26028" target="_blank" rel="noopener">Xiong et al.</a></p>
+    </div>
+  </footer>
+
+  <div class="tip" id="tip" role="tooltip" hidden></div>
+  <script src="static/site.js" defer></script>
 </body>
 </html>

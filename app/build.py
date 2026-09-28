@@ -10,17 +10,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FILES = {
     'index.html': 'index.html',
-    'technical-report.html': 'technical-report/index.html',
-    'animation/reviewer-manipulation.gif': 'static/animation/reviewer-manipulation.gif',
-    **{name: 'static/' + name for name in ('site.css', 'site.js', 'report.js',
-                                         'data/snapshot.json', 'data/catalogue.json', 'data/evidence.json')},
+    **{name: 'static/' + name for name in ('site.css', 'site.js', 'cover.png', 'data/meta.json', 'data/agents.json', 'data/reviewers.json')},
 }
 
 
 def asset_source(root: Path, name: str) -> Path:
-    if name == 'animation/reviewer-manipulation.gif':
-        return root / 'app' / name
     return root / 'app/static' / name
+
+
+def published(root: Path = ROOT) -> dict[str, str]:
+    shards = sorted(path.relative_to(root / 'app/static').as_posix()
+                    for path in (root / 'app/static/data/feedback').glob('*.json'))
+    return {**FILES, **{name: 'static/' + name for name in shards}}
 
 
 def build(destination: Path, repo_url: str = '') -> Path:
@@ -30,21 +31,23 @@ def build(destination: Path, repo_url: str = '') -> Path:
         raise ValueError('the export directory must not contain application sources')
     if repo_url and not re.fullmatch(r'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?', repo_url):
         raise ValueError('repo URL must be an HTTPS GitHub repository URL')
-    permitted = set(FILES.values()) | {'.nojekyll'}
+    files = published(ROOT)
+    permitted = set(files.values()) | {'.nojekyll'}
     if destination.exists():
         unexpected = [str(path.relative_to(destination)) for path in destination.rglob('*')
                       if path.is_file() and str(path.relative_to(destination)) not in permitted]
         if unexpected:
             raise ValueError('export directory contains unexpected files; choose an empty directory')
     asset_versions = {name: sha256(asset_source(ROOT, name).read_bytes()).hexdigest()[:12]
-                      for name in FILES if name.endswith(('.css', '.js', '.gif'))}
-    for name, target in FILES.items():
+                      for name in files if name.endswith(('.css', '.js'))}
+    for name, target in files.items():
         content = asset_source(ROOT, name).read_bytes()
         if name.endswith('.html'):
             for asset, version in asset_versions.items():
                 content = content.replace(f'static/{asset}"'.encode(), f'static/{asset}?v={version}"'.encode())
             if repo_url:
                 content = content.replace(b'data-repo-link hidden', f'data-repo-link href="{repo_url.rstrip("/")}"'.encode())
+                content = content.replace(b'data-issues-link hidden', f'data-issues-link href="{repo_url.rstrip("/")}/issues/new"'.encode())
         output = destination / target
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_bytes(content)

@@ -1,0 +1,39 @@
+address,name,category,kind,source
+0xf70da97812cb96acdf810712aa562db8dfa3dbef,Relay: Solver,bridge,eoa,Basescan name tag
+0x8c826f795466e39acbff1bb4eeeb759609377ba1,Gas.zip 1,bridge,eoa,Basescan name tag
+0xe93685f3bba03016f02bd1828badd6195988d950,LayerZero: Executor,bridge,eoa,Basescan name tag
+0x39591e7c099a379fd7b349ebfecaeef439c40454,OKX 177,exchange,eoa,Basescan name tag
+0x3304e22ddaa22bcdc5fca2269b418046ae7b566a,Binance 73,exchange,eoa,Basescan name tag
+0xfd92f4e91d54b9ef91cc3f97c011a6af0c2a7eda,OKX,exchange,eoa,Basescan name tag
+0xbaed383ede0e5d9d72430661f3285daa77e9439f,Bybit: Hot Wallet 6,exchange,eoa,Basescan name tag
+0x45a318273749d6eb00f5f6ca3bc7cd3de26d642a,Owlto Finance: Bridge,bridge,eoa,Basescan name tag
+0x97b9d2102a9a65a26e1ee82d59e42d1b73b68689,Bitget 3,exchange,eoa,Basescan name tag
+0x2cff890f0378a11913b6129b2e97417a2c302680,NEAR Intents: Treasury,bridge,eoa,Basescan name tag
+0x18b0f4547a89fe4c5fe84f258bea3601fa281e9f,KuCoin 57,exchange,eoa,Basescan name tag
+0xe4edb277e41dc89ab076a1f049f4a3efa700bce8,Orbiter Finance: Bridge 2,bridge,eoa,Basescan name tag
+0x80c67432656d59144ceff962e8faf8926599bcf8,Orbiter Finance: Bridge 1,bridge,eoa,Basescan name tag
+0x331d9a049d496385998067abf6cbb6371c8d2466,Relay: Solver,bridge,eoa,Basescan name tag
+0x2fc617e933a52713247ce25730f6695920b3befe,Layerswap 1,bridge,eoa,Basescan name tag
+0xd782268f600403843484b70710daee6846fc0db8,Relay: Solver,bridge,eoa,Basescan name tag
+0x15652636f3898f550b257b89926d5566821c32e1,Across Protocol: Relayer 2,bridge,eoa,Basescan name tag
+0xa5a5491bca93dd4c076e4906e79e7673f4a5a142,Relay: Solver,bridge,eoa,Basescan name tag
+0x00000000000007736e2f9aa5630b8c812e1f3fc9,Chaineye: Mini Bridge,bridge,eoa,Basescan name tag
+0x5e809a85aa182a9921edd10a4163745bb3e36284,Owlto Finance: Bridge 2,bridge,eoa,Basescan name tag
+0x4e3ae00e8323558fa5cac04b152238924aa31b60,MEXC 15,exchange,eoa,Basescan name tag
+0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d,Rhino.fi,bridge,eoa,Basescan name tag
+0x710bda329b2a6224e4b44833de30f38e7f81d564,Hop Protocol: ETH Bonder,bridge,eoa,Basescan name tag
+0x0ec4e45f9ce3020024c0418a74cd31fbc487038f,Relay: Solver,bridge,eoa,Basescan name tag
+0xb92fe925dc43a0ecde6c8b1a2709c170ec4fff4f,Relay: Router V3,bridge,contract,Basescan name tag
+0xdc181bd607330aeebef6ea62e03e5e1fb4b6f7c7,Stargate: Pool Native,bridge,contract,Basescan name tag
+0x2f59e9086ec8130e21bd052065a9e6b2497bb102,Rhino.fi: Bridge,bridge,contract,Basescan name tag
+0xad6cea45f98444a922a2b4fe96b8c90f0862d2f4,Squid: Multicall,bridge,contract,Basescan name tag
+0x10541b07d8ad2647dc6cd67abd4c03575dade261,Hop Protocol: ETH Wrapper,bridge,contract,Basescan name tag
+0x09aea4b2242abc8bb4bb78d537a67a245a7bec64,Across Protocol: Base Spoke Pool,bridge,contract,Basescan name tag
+0xe8c5b8488feafb5df316be73ede3bdc26571a773,Socket: Refuel,bridge,contract,Basescan name tag
+0xc38e4e6a15593f908255214653d3d947ca1c2338,Mayan: Mayan Swift,bridge,contract,Basescan name tag
+0xc6868edf1d2a7a8b759856cb8afa333210dfeda6,Aori: Omnichain Settlement Core,bridge,contract,Basescan name tag
+0x224d8fd7ab6ad4c6eb4611ce56ef35dec2277f03,Stargate: ETH Vault,bridge,contract,Basescan verified contract name
+0xcb566e3b6934fa77258d68ea18e931fa75e1aaaa,LayerZero: Relayer,bridge,contract,Basescan name tag
+0xd152f549545093347a162dce210e7293f1452150,Disperse.app 2,disperse,contract,Basescan name tag
+0x6b2c0c7be2048daa9b5527982c29f48062b34d58,OKX Labs: DEX Router 7,other,contract,Basescan name tag
+0x8e1d36f9da8cfe842bcf8670a12acd51c26d195d,Unwrapper,other,contract,Basescan verified contract name

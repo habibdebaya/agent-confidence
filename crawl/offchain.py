@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import gzip
 import ipaddress
 import json
 import socket
@@ -84,11 +85,13 @@ def uri_scheme(uri: str) -> str:
     return "unknown"
 
 
+LOCAL_SCHEMES = {"empty", "raw_json", "raw_xml_svg", "data"}
+
+
 def _decode_data_uri(uri: str) -> bytes:
     header, payload = uri.split(",", 1)
-    if ";base64" in header.lower():
-        return base64.b64decode(payload, validate=True)
-    return unquote_to_bytes(payload)
+    raw = base64.b64decode(payload, validate=True) if ";base64" in header.lower() else unquote_to_bytes(payload)
+    return gzip.decompress(raw) if "enc=gzip" in header.lower() else raw
 
 
 def _body_fields(raw: bytes) -> dict[str, str]:
@@ -104,10 +107,10 @@ def fetch_uri(
     client: httpx.Client | None = None,
 ) -> dict[str, Any]:
     path = app.raw / "offchain" / f"{cache_key(uri)}.json"
-    cached = read_json(path)
+    scheme = uri_scheme(uri)
+    cached = None if scheme in LOCAL_SCHEMES else read_json(path)
     if cached is not None:
         return cached
-    scheme = uri_scheme(uri)
     record: dict[str, Any] = {"uri": uri, "scheme": scheme, "status": "failure"}
     try:
         if scheme == "empty":

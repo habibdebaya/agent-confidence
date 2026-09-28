@@ -12,14 +12,14 @@ from .indexed_feedback import crawl_indexed_feedback
 from .offchain import ingest_offchain
 from .payments import crawl_payments
 from .prices import add_usd_gas
-from .provenance import crawl_provenance, merge_reviewer_flags
+from .provenance import crawl_provenance, mark_infrastructure, merge_reviewer_flags
 from .reproduce import assert_acceptance, assert_m3_acceptance, write_m3_report, write_reproduction
 from .reviewers import crawl_onchain_reviewers
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="erc8004")
-    parser.add_argument("command", choices=("crawl", "indexed-feedback", "m3", "offchain", "provenance", "reviewers", "payments", "reproduce", "semantics", "pipeline"))
+    parser.add_argument("command", choices=("crawl", "indexed-feedback", "m3", "offchain", "provenance", "infrastructure", "reviewers", "payments", "reproduce", "semantics", "pipeline"))
     parser.add_argument("--config", default="config.yaml")
     scope = parser.add_mutually_exclusive_group(required=True)
     scope.add_argument("--chain", choices=("eth", "base", "bsc"))
@@ -91,6 +91,12 @@ def main() -> None:
         for chain in chains:
             crawl_provenance(app, chain, end_block=args.end_block, reviewers_only=args.reviewers_only)
         merge_reviewer_flags(app, chains)
+    if args.command == "infrastructure":
+        if args.end_block is None:
+            raise ValueError("infrastructure requires --end-block")
+        for chain in chains:
+            busy = mark_infrastructure(app, chain, args.end_block)
+            print(f"{chain.name}: {len(busy)} funders above the transaction threshold")
     if args.command in {"payments", "pipeline"}:
         for chain in chains:
             crawl_payments(app, chain, args.end_block, args.start_block)

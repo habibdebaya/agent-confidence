@@ -16,6 +16,8 @@ from .rpc import JsonRpc, RpcError
 
 
 ELIGIBLE_FUNDER_TYPES = {"eoa", "delegated_eoa"}
+INFRASTRUCTURE_TX_COUNT = 10_000
+INFRASTRUCTURE_LABEL = "a high-volume sender"
 
 
 class ExplorerError(RuntimeError):
@@ -385,6 +387,35 @@ def crawl_provenance(
         {chain.name: chain.paper_end_block},
     )[chain.name]
     _write(directory / "reviewer_provenance.parquet", rows)
+
+
+def effective_funder(row: Mapping[str, Any]) -> str:
+    operator = row.get("operator")
+    return str(operator if row.get("funder_type") == "contract" and operator else row["funder"]).lower()
+
+
+def mark_infrastructure(app: AppConfig, chain: ChainConfig, block: int, threshold: int = INFRASTRUCTURE_TX_COUNT) -> dict[str, int]:
+    require(chain.rpc_url, f"{chain.name.upper()}_RPC_URL")
+    path = app.parquet / chain.name / "funding.parquet"
+    rows = pl.read_parquet(path).to_dicts()
+    tag = hex(block)
+    senders = sorted({effective_funder(row) for row in rows})
+    with JsonRpc(chain.rpc_url, app.raw, chain.name, batch_size=20) as rpc:
+        values = _cached_rpc_batch(
+            rpc,
+            app.raw / "provenance" / chain.name / "tx_count" / tag,
+            "eth_getTransactionCount",
+            {sender: [sender, tag] for sender in senders},
+        )
+    counts = {sender: int(value, 16) for sender, value in values.items()}
+    for row in rows:
+        count = counts[effective_funder(row)]
+        row["funder_tx_count"] = count
+        if count > threshold and not row.get("external_root"):
+            row["external_root"] = True
+            row["funder_label"] = row.get("funder_label") or INFRASTRUCTURE_LABEL
+    _write(path, rows)
+    return {sender: count for sender, count in counts.items() if count > threshold}
 
 
 def is_sybil_edge(row: Mapping[str, Any]) -> bool:

@@ -1,6 +1,6 @@
 PYTHON ?= .venv/bin/python
 
-.PHONY: install test serve site confidence-data confidence-check experiments crawl offchain provenance payments grounding reproduce
+.PHONY: install test serve site data check crawl offchain provenance payments grounding reproduce
 
 install:
 	python3 -m venv .venv
@@ -15,14 +15,11 @@ serve:
 site:
 	python3 -m app.build
 
-confidence-data:
-	$(PYTHON) -m eval.confidence
+data:
+	$(PYTHON) -m eval.reviewmap
 
-confidence-check:
-	$(PYTHON) -m eval.confidence --check
-
-experiments:
-	$(PYTHON) -m sim.confidence
+check:
+	$(PYTHON) -m eval.reviewmap --check
 
 crawl:
 	$(PYTHON) -m crawl.cli crawl --all

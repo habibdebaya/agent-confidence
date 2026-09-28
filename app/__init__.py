@@ -1,1 +1,1 @@
-"""ERC-8004 confidence assessment and static export."""
+"""Static site for Tracing ERC-8004 Reviews."""
