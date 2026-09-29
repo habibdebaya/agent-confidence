@@ -8,7 +8,7 @@ const TITLE = 'Tracing ERC-8004 Reviews';
 const KINDS = {exchange: 'exchange', bridge: 'bridge', relayer: 'relayer', paymaster: 'paymaster', faucet: 'faucet', wallet_infra: 'wallet service', platform: 'platform', busy: 'busy address'};
 const SERVICE = new Set(Object.keys(KINDS));
 const an = word => (/^[aeiou]/.test(word) ? 'an ' : 'a ') + word;
-const state = {meta: null, full: null, loading: null, shards: new Map(), current: null, token: 0, matches: [], active: -1};
+const state = {meta: null, full: null, loading: null, shards: new Map(), current: null, token: 0, matches: [], active: -1, hinted: null};
 
 const $ = selector => document.querySelector(selector);
 const fmt = value => Number(value).toLocaleString('en-US');
@@ -57,9 +57,15 @@ function rules() {
   };
 }
 
+function unhint() {
+  state.hinted = null;
+  $('#tip').hidden = true;
+}
+
 function hint(node, lines) {
   const tip = $('#tip');
   const show = () => {
+    state.hinted = node;
     tip.replaceChildren(h('strong', {text: lines[0]}), ...lines.slice(1).map(line => h('span', {text: line})));
     tip.hidden = false;
     const box = node.getBoundingClientRect();
@@ -68,10 +74,17 @@ function hint(node, lines) {
     tip.style.left = `${left}px`;
     tip.style.top = `${top < 8 ? box.bottom + 8 : top}px`;
   };
-  const hide = () => { tip.hidden = true; };
   for (const type of ['mouseenter', 'focus']) node.addEventListener(type, show);
-  for (const type of ['mouseleave', 'blur']) node.addEventListener(type, hide);
+  for (const type of ['mouseleave', 'blur']) node.addEventListener(type, unhint);
   return node;
+}
+
+function bindHints() {
+  addEventListener('scroll', unhint, {capture: true, passive: true});
+  for (const type of ['resize', 'blur', 'pointerdown']) addEventListener(type, unhint);
+  document.addEventListener('visibilitychange', unhint);
+  document.addEventListener('mouseout', event => { if (!event.relatedTarget) unhint(); });
+  document.addEventListener('mouseover', event => { if (state.hinted && !state.hinted.contains(event.target)) unhint(); });
 }
 
 const swatch = label => h('span', {class: `swatch l-${label}`, 'aria-hidden': 'true'});
@@ -437,6 +450,7 @@ function renderAgent(view) {
 }
 
 function clearAgent() {
+  unhint();
   $('#agent').replaceChildren();
   document.body.classList.remove('has-agent');
   document.title = TITLE;
@@ -446,6 +460,7 @@ function clearAgent() {
 
 async function show(id, {push = true, scroll = false} = {}) {
   const token = ++state.token;
+  unhint();
   const url = new URL(location.href);
   url.searchParams.set('agent', id);
   if (push && state.current !== id) history.pushState({agent: id}, '', url);
@@ -641,6 +656,7 @@ function bindTheme() {
 async function init() {
   bindTheme();
   bindSearch();
+  bindHints();
   try {
     state.meta = await json('static/data/meta.json');
   } catch {
